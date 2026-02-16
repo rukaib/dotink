@@ -1,0 +1,935 @@
+/**
+ * DOT INK Quotation Management System
+ * Main Stylesheet
+ */
+
+/* ==========================================
+   ROOT VARIABLES
+   ========================================== */
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0a58ca;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #0dcaf0;
+    --secondary: #6c757d;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --cyan: #00B0F0;
+    --blue: #0070C0;
+}
+
+/* ==========================================
+   BASE STYLES
+   ========================================== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    flex: 1;
+    padding-bottom: 20px;
+}
+
+/* ==========================================
+   NAVBAR CUSTOMIZATION
+   ========================================== */
+.navbar-brand {
+    font-size: 1.4rem;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+/* ==========================================
+   CARD STYLES
+   ========================================== */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    font-weight: 600;
+}
+
+.card-header.bg-primary,
+.card-header.bg-success,
+.card-header.bg-info,
+.card-header.bg-danger,
+.card-header.bg-warning {
+    border-bottom: none;
+}
+
+/* ==========================================
+   TYPEAHEAD DROPDOWN STYLES
+   ========================================== */
+.typeahead-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 1050;
+    display: none;
+}
+
+.typeahead-dropdown.show {
+    display: block;
+}
+
+.typeahead-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background 0.15s;
+}
+
+.typeahead-item:last-child {
+    border-bottom: none;
+}
+
+.typeahead-item:hover,
+.typeahead-item.active {
+    background-color: #e7f3ff;
+}
+
+.typeahead-item.add-new {
+    background-color: #d4edda;
+    color: #155724;
+    font-weight: 600;
+}
+
+.typeahead-item.add-new:hover {
+    background-color: #c3e6cb;
+}
+
+.typeahead-item img {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.typeahead-item .product-info {
+    flex: 1;
+}
+
+.typeahead-item .product-code {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.typeahead-item .product-name {
+    color: #333;
+}
+
+.typeahead-item .product-price {
+    color: var(--success);
+    font-weight: 600;
+}
+
+/* ==========================================
+   PRODUCT SEARCH IN TABLE
+   ========================================== */
+.product-search-container {
+    position: relative;
+}
+
+.product-search-container .product-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 0 0 6px 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1100;
+    display: none;
+}
+
+.product-search-container .product-dropdown.show {
+    display: block;
+}
+
+/* ==========================================
+   ITEMS TABLE STYLES
+   ========================================== */
+#itemsTable {
+    font-size: 0.9rem;
+}
+
+#itemsTable th {
+    font-weight: 600;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#itemsTable td {
+    vertical-align: middle;
+}
+
+#itemsTable .form-control {
+    font-size: 0.85rem;
+}
+
+#itemsTable .form-select {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+#itemsTable textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.product-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+/* Item row hover effect */
+.item-row:hover {
+    background-color: #f8f9fa;
+}
+
+/* Remove item button */
+.remove-item-btn {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.remove-item-btn:hover {
+    opacity: 1;
+}
+
+/* ==========================================
+   FORM STYLES
+   ========================================== */
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.3rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.form-control-lg {
+    font-size: 1rem;
+}
+
+/* Input group styling */
+.input-group-text {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+/* ==========================================
+   BUTTON STYLES
+   ========================================== */
+.btn {
+    font-weight: 500;
+    border-radius: 0.375rem;
+}
+
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+}
+
+.btn-group-sm .btn {
+    padding: 0.35rem 0.6rem;
+}
+
+/* ==========================================
+   TABLE STYLES
+   ========================================== */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    font-weight: 600;
+    border-bottom-width: 1px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* ==========================================
+   BADGE STYLES
+   ========================================== */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+}
+
+/* ==========================================
+   SUMMARY CARD STYLES
+   ========================================== */
+.border-primary {
+    border-width: 2px !important;
+}
+
+/* ==========================================
+   FOOTER STYLES
+   ========================================== */
+.footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* ==========================================
+   LOADING SPINNER
+   ========================================== */
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   ALERT ANIMATIONS
+   ========================================== */
+.alert {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE ADJUSTMENTS
+   ========================================== */
+@media (max-width: 992px) {
+    .typeahead-dropdown {
+        max-height: 250px;
+    }
+    
+    #itemsTable {
+        font-size: 0.8rem;
+    }
+    
+    .product-thumbnail {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* ==========================================
+   VALIDATION STYLES
+   ========================================== */
+.is-invalid {
+    border-color: var(--danger) !important;
+}
+
+.is-invalid:focus {
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+.invalid-feedback {
+    display: none;
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.is-invalid ~ .invalid-feedback {
+    display: block;
+}
+
+/* ==========================================
+   VAT COLUMN ANIMATION
+   ========================================== */
+.vat-column {
+    transition: all 0.3s ease;
+}
+
+/* ==========================================
+   PRINT STYLES
+   ========================================== */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    body {
+        background: #fff;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+/* ==========================================
+   CUSTOM SCROLLBAR
+   ========================================== */
+.typeahead-dropdown::-webkit-scrollbar,
+.product-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+.typeahead-dropdown::-webkit-scrollbar-track,
+.product-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.typeahead-dropdown::-webkit-scrollbar-thumb,
+.product-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.typeahead-dropdown::-webkit-scrollbar-thumb:hover,
+.product-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* ==========================================
+   EMPTY STATE STYLES
+   ========================================== */
+.empty-state {
+    padding: 3rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* ==========================================
+   STATUS COLORS
+   ========================================== */
+.status-draft { color: #6c757d; }
+.status-final { color: #198754; }
+.status-approved { color: #0d6efd; }
+.status-rejected { color: #dc3545; }
+.status-expired { color: #ffc107; }
+
+/* ==========================================
+   MODAL STYLES
+   ========================================== */
+
+.modal-xl {
+    max-width: 1200px;
+}
+
+#customerTable tr:hover,
+#productTable tr:hover {
+    background-color: #e3f2fd !important;
+}
+
+#customerTable tr,
+#productTable tr {
+    transition: background-color 0.2s;
+}
+
+.select-customer-btn,
+.select-product-btn {
+    transition: all 0.2s;
+}
+
+.select-customer-btn:hover,
+.select-product-btn:hover {
+    transform: scale(1.05);
+}
+
+/* Item Row Styles */
+.item-row {
+    transition: background-color 0.2s;
+}
+
+.item-row:hover {
+    background-color: #f8f9fa;
+}
+
+.btn-select-product {
+    border-radius: 0 0.375rem 0.375rem 0;
+}
+
+.item-product-name {
+    cursor: pointer;
+}
+
+.item-product-name:hover {
+    background-color: #e9ecef;
+}
+
+/* Modal Animation */
+.modal.fade .modal-dialog {
+    transform: scale(0.9);
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Search Input Highlight */
+#customerSearchInput:focus,
+#productSearchInput:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table Row Selection */
+#customerTableBody tr.selected,
+#productTableBody tr.selected {
+    background-color: #cfe2ff !important;
+    border-left: 4px solid #0d6efd;
+}
+
+/* New Form Card */
+#newCustomerForm,
+#newProductForm {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Badge for Product Code */
+.text-success.product-code {
+    font-family: 'Courier New', monospace;
+}
+
+/* Item Number Column */
+.item-number {
+    font-weight: bold;
+    color: #6c757d;
+}
+
+/* Button Group in Item Row */
+.item-row .btn-group {
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.item-row:hover .btn-group {
+    opacity: 1;
+}
+
+/* Loading Spinner in Modal */
+#customerLoading,
+#productLoading {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* No Results Message */
+#customerNoResults,
+#productNoResults {
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-xl {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+    
+    #customerTable th,
+    #customerTable td,
+    #productTable th,
+    #productTable td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* ==========================================
+   PRODUCT EDIT MODAL STYLES
+   ========================================== */
+
+#productEditStep .card {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#productEditStep .form-label {
+    color: #495057;
+}
+
+#productEditStep .form-control-lg,
+#productEditStep .form-select-lg {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+}
+
+/* Preview Card */
+#productEditStep .card.bg-light {
+    border: 2px dashed #dee2e6;
+}
+
+#previewTotal {
+    font-size: 1.5rem;
+}
+
+/* Item Row Display */
+.item-product-name-display {
+    font-size: 0.95rem;
+    padding: 5px 0;
+    transition: background-color 0.2s;
+    border-radius: 4px;
+}
+
+.item-product-name-display:hover {
+    background-color: #e9ecef;
+    padding-left: 8px;
+}
+
+.item-description-display {
+    display: block;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.item-warranty-display {
+    font-size: 0.85rem;
+}
+
+/* Table Row Hover */
+#customerTable tbody tr:hover,
+#productTable tbody tr:hover {
+    background-color: #d4edda !important;
+    cursor: pointer;
+}
+
+/* Action Buttons in Item Row */
+.item-row .btn-group {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.item-row:hover .btn-group {
+    opacity: 1;
+}
+
+/* Modal Animation */
+.modal .card {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Warranty Dropdowns */
+#editWarrantyValue,
+#editWarrantyType {
+    min-width: 100px;
+}
+
+/* Back Button */
+#backToProductList {
+    transition: all 0.2s;
+}
+
+#backToProductList:hover {
+    transform: translateX(-3px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #productEditStep .row > div {
+        margin-bottom: 1rem;
+    }
+    
+    .item-row .btn-group {
+        opacity: 1;
+    }
+}
+
+/* ==========================================
+   CUSTOMER AUTOCOMPLETE
+   ========================================== */
+
+.autocomplete-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1050;
+}
+
+.autocomplete-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover {
+    background: #e3f2fd;
+}
+
+.autocomplete-item.add-new {
+    background: #d4edda;
+    color: #155724;
+}
+
+.autocomplete-item.add-new:hover {
+    background: #c3e6cb;
+}
+
+/* ==========================================
+   PRODUCT CARDS IN MODAL
+   ========================================== */
+
+.product-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.product-card:hover {
+    border-color: #28a745;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+}
+
+.product-card.new-product {
+    border-color: #007bff;
+    border-width: 2px;
+    background: #f8f9ff;
+}
+
+.product-card.added {
+    background: #d4edda;
+    border-color: #28a745;
+}
+
+.product-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.product-card-header .product-code {
+    font-weight: 600;
+    color: #28a745;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.product-card-header .add-product-btn {
+    padding: 5px 15px;
+    font-weight: 500;
+}
+
+.product-card-body {
+    padding: 15px;
+}
+
+.product-card-body .product-name-input {
+    font-weight: 600;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+}
+
+.product-card-body .product-name-input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+}
+
+.product-card-body .form-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.product-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.product-card-footer .product-total {
+    font-size: 1.1rem;
+}
+
+/* ==========================================
+   QUOTATION ITEMS TABLE
+   ========================================== */
+
+.quotation-item-row {
+    transition: background-color 0.2s;
+}
+
+.quotation-item-row:hover {
+    background-color: #f8f9fa;
+}
+
+.quotation-item-row .btn-group {
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.quotation-item-row:hover .btn-group {
+    opacity: 1;
+}
+
+.item-name-display {
+    font-size: 0.95rem;
+}
+
+.item-desc-display {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================
+   EDIT ITEM MODAL
+   ========================================== */
+
+#editItemModal .form-control,
+#editItemModal .form-select {
+    border-radius: 6px;
+}
+
+#editItemModal .form-control:focus,
+#editItemModal .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 768px) {
+    .product-card-body {
+        padding: 10px;
+    }
+    
+    .product-card-header,
+    .product-card-footer {
+        padding: 8px 10px;
+    }
+    
+    .quotation-item-row .btn-group {
+        opacity: 1;
+    }
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+@keyframes highlight {
+    0% { background-color: #d4edda; }
+    100% { background-color: transparent; }
+}
+
+.quotation-item-row.highlight {
+    animation: highlight 1s ease;
+}
