@@ -22,16 +22,34 @@ if (!$quotation) {
     exit;
 }
 
-// Calculate amount in words
+// Calculate base URL for images (absolute path)
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$basePath = '';
+$scriptDir = dirname($_SERVER['SCRIPT_NAME']);
+if (strpos($scriptDir, '/dotink') !== false) {
+    $basePath = substr($scriptDir, 0, strpos($scriptDir, '/dotink') + 7);
+} else {
+    $basePath = '/dotink';
+}
+$baseUrl = $protocol . '://' . $host . $basePath;
+
+// Logo path - absolute URL
+$logoPath = $baseUrl . '/assets/images/logo.png';
+
+// Check if logo exists
+$logoFullPath = __DIR__ . '/../../assets/images/logo.png';
+$logoExists = file_exists($logoFullPath);
+
+// Amount in words
 $amountInWords = 'Rupees ' . $quotationModel->numberToWords((int)$quotation['grand_total']) . ' Only';
 
-// Pagination for items
+// Pagination
 $itemsPerFirstPage = 6;
 $itemsPerNextPage = 12;
 $items = $quotation['items'];
 $totalItems = count($items);
 
-// Split items into pages
 $pages = [];
 if ($totalItems <= $itemsPerFirstPage) {
     $pages[] = $items;
@@ -45,8 +63,7 @@ if ($totalItems <= $itemsPerFirstPage) {
 }
 $totalPages = count($pages);
 
-// Format warranty
-function formatWarranty($value, $type) {
+function formatWarrantyPrint($value, $type) {
     if ($type === 'Lifetime') return 'Lifetime';
     if ($value && $type) return $value . ' ' . $type;
     return '-';
@@ -59,9 +76,7 @@ function formatWarranty($value, $type) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quotation - <?= htmlspecialchars($quotation['quotation_no']) ?></title>
     <style>
-        /* ==========================================
-           RESET & BASE
-           ========================================== */
+        /* Reset */
         * {
             margin: 0;
             padding: 0;
@@ -84,9 +99,7 @@ function formatWarranty($value, $type) {
             print-color-adjust: exact !important;
         }
 
-        /* ==========================================
-           PRINT & ACTION BUTTONS
-           ========================================== */
+        /* Action Buttons */
         .action-buttons {
             position: fixed;
             top: 20px;
@@ -97,51 +110,44 @@ function formatWarranty($value, $type) {
         }
 
         .action-btn {
-            background-color: #0070C0;
-            color: white;
-            border: none;
             padding: 12px 25px;
             font-size: 16px;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: none;
             text-decoration: none;
-            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s;
         }
 
-        .action-btn:hover {
-            background-color: #005a9e;
+        .btn-back {
+            background: #6c757d;
             color: white;
         }
 
-        .action-btn.print-btn {
-            background-color: #198754;
+        .btn-back:hover {
+            background: #5a6268;
         }
 
-        .action-btn.print-btn:hover {
-            background-color: #146c43;
+        .btn-print {
+            background: #28a745;
+            color: white;
         }
 
-        .action-btn.back-btn {
-            background-color: #6c757d;
+        .btn-print:hover {
+            background: #218838;
         }
 
-        .action-btn.back-btn:hover {
-            background-color: #5a6268;
-        }
-
-        /* ==========================================
-           A4 PAGE SETUP
-           ========================================== */
+        /* A4 Page */
         @page {
             size: A4 portrait;
             margin: 0;
         }
 
-        /* ==========================================
-           PAGE CONTAINER
-           ========================================== */
         .page {
             width: 210mm;
             height: 297mm;
@@ -153,21 +159,17 @@ function formatWarranty($value, $type) {
             flex-direction: column;
             overflow: hidden;
             page-break-after: always;
-            page-break-inside: avoid;
         }
 
         .page:last-child {
             page-break-after: auto;
         }
 
-        /* ==========================================
-           HEADER
-           ========================================== */
+        /* Header */
         .header {
             border-bottom: 2.5px solid var(--cyan);
             padding-bottom: 3mm;
             margin-bottom: 3mm;
-            flex-shrink: 0;
         }
 
         .header-table {
@@ -176,23 +178,24 @@ function formatWarranty($value, $type) {
         }
 
         .header-left {
-            width: 35%;
+            width: 40%;
             vertical-align: middle;
         }
 
         .header-right {
-            width: 65%;
+            width: 60%;
             text-align: right;
             vertical-align: middle;
         }
 
         .logo-img {
-            max-width: 200px;
+            max-width: 180px;
+            max-height: 60px;
             height: auto;
         }
 
         .logo-text {
-            font-size: 18pt;
+            font-size: 20pt;
             font-weight: bold;
             color: var(--blue);
         }
@@ -207,33 +210,28 @@ function formatWarranty($value, $type) {
         .company-details {
             font-size: 8pt;
             color: #555;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
-        /* ==========================================
-           CONTENT AREA
-           ========================================== */
+        /* Content */
         .content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
 
-        /* ==========================================
-           TITLE
-           ========================================== */
+        /* Title */
         .title {
             text-align: center;
             margin-bottom: 3mm;
-            flex-shrink: 0;
         }
 
         .title h1 {
             font-size: 16pt;
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             margin: 0;
+            color: var(--dark);
         }
 
         .page-indicator {
@@ -242,16 +240,13 @@ function formatWarranty($value, $type) {
             margin-top: 1mm;
         }
 
-        /* ==========================================
-           INFO TABLE
-           ========================================== */
+        /* Info Table */
         .info-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 3mm;
             font-size: 9pt;
             border: 1px solid #ccc;
-            flex-shrink: 0;
         }
 
         .info-table td {
@@ -275,19 +270,12 @@ function formatWarranty($value, $type) {
             width: 5px;
         }
 
-        .info-table .val {
-            color: #000;
-        }
-
-        /* ==========================================
-           TERMS TABLE
-           ========================================== */
+        /* Terms Table */
         .terms-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 3mm;
             font-size: 8pt;
-            flex-shrink: 0;
         }
 
         .terms-table th,
@@ -303,16 +291,13 @@ function formatWarranty($value, $type) {
             text-transform: uppercase;
         }
 
-        /* ==========================================
-           ITEMS TABLE
-           ========================================== */
+        /* Items Table */
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 3mm;
             font-size: 8pt;
             border: 1px solid #000;
-            flex-shrink: 0;
         }
 
         .items-table th {
@@ -327,7 +312,7 @@ function formatWarranty($value, $type) {
         }
 
         .items-table td {
-            padding: 1.5mm 1.5mm;
+            padding: 1.5mm;
             border: 1px solid #000;
             vertical-align: top;
         }
@@ -348,7 +333,6 @@ function formatWarranty($value, $type) {
             white-space: pre-line;
         }
 
-        /* Continued indicator */
         .continued-note {
             text-align: center;
             font-size: 8pt;
@@ -358,16 +342,12 @@ function formatWarranty($value, $type) {
             background: #f9f9f9;
             border: 1px dashed #ccc;
             margin-bottom: 3mm;
-            flex-shrink: 0;
         }
 
-        /* ==========================================
-           TOTALS
-           ========================================== */
+        /* Totals */
         .totals-wrapper {
             width: 100%;
             margin-bottom: 3mm;
-            flex-shrink: 0;
         }
 
         .totals-table {
@@ -425,13 +405,10 @@ function formatWarranty($value, $type) {
             color: #0dcaf0;
         }
 
-        /* ==========================================
-           NOTES
-           ========================================== */
+        /* Notes */
         .notes-box {
             border: 1px solid var(--cyan);
             margin-bottom: 3mm;
-            flex-shrink: 0;
         }
 
         .notes-title {
@@ -450,18 +427,10 @@ function formatWarranty($value, $type) {
             line-height: 1.3;
         }
 
-        /* ==========================================
-           FOOTER
-           ========================================== */
+        /* Footer */
         .footer {
             margin-top: auto;
-            flex-shrink: 0;
             padding-top: 2mm;
-        }
-
-        .footer-contact {
-            padding-bottom: 2mm;
-            margin-bottom: 2mm;
         }
 
         .footer-contact-table {
@@ -488,13 +457,9 @@ function formatWarranty($value, $type) {
             font-size: 9pt;
         }
 
-        .footer-bottom {
-            margin-top: auto;
-        }
-
         .footer-line {
             border-top: 1.5px solid var(--cyan);
-            margin: 0;
+            margin: 2mm 0 0 0;
         }
 
         .footer-copyright {
@@ -504,9 +469,7 @@ function formatWarranty($value, $type) {
             padding-top: 1.5mm;
         }
 
-        /* ==========================================
-           PRINT STYLES
-           ========================================== */
+        /* Print Styles */
         @media print {
             html, body {
                 width: 210mm;
@@ -516,26 +479,16 @@ function formatWarranty($value, $type) {
             }
 
             .page {
-                width: 210mm;
-                min-height: 297mm;
-                padding: 10mm 15mm;
                 margin: 0;
-                break-after: page;
                 page-break-after: always;
             }
 
             .page:last-child {
-                break-after: auto;
                 page-break-after: auto;
-            }
-
-            .items-table tr {
-                page-break-inside: avoid;
             }
 
             .items-table th {
                 background: var(--cyan) !important;
-                color: #fff !important;
                 -webkit-print-color-adjust: exact;
             }
 
@@ -546,17 +499,6 @@ function formatWarranty($value, $type) {
 
             .notes-title {
                 background: var(--cyan) !important;
-                color: #fff !important;
-                -webkit-print-color-adjust: exact;
-            }
-
-            .words-box {
-                background: #f9f9f9 !important;
-                -webkit-print-color-adjust: exact;
-            }
-
-            .footer-line {
-                border-top-color: var(--cyan) !important;
                 -webkit-print-color-adjust: exact;
             }
 
@@ -565,28 +507,30 @@ function formatWarranty($value, $type) {
             }
         }
 
-        /* ==========================================
-           SCREEN PREVIEW
-           ========================================== */
+        /* Screen Preview */
         @media screen {
             body {
-                background: #555;
+                background: #444;
                 padding: 20mm 10mm;
             }
 
             .page {
-                box-shadow: 0 0 20px rgba(0,0,0,0.4);
-                margin-bottom: 10mm;
+                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                margin-bottom: 15mm;
             }
         }
     </style>
 </head>
 <body>
 
-<!-- Action Buttons (No Print) -->
+<!-- Action Buttons -->
 <div class="action-buttons no-print">
-    <a href="view.php?id=<?= $id ?>" class="action-btn back-btn">← Back</a>
-    <button class="action-btn print-btn" onclick="window.print()">🖨️ Print</button>
+    <a href="view.php?id=<?= $id ?>" class="action-btn btn-back">
+        ← Back
+    </a>
+    <button class="action-btn btn-print" onclick="window.print()">
+        🖨️ Print
+    </button>
 </div>
 
 <?php foreach ($pages as $pageIndex => $pageItems): ?>
@@ -602,27 +546,28 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
         <table class="header-table">
             <tr>
                 <td class="header-left">
-                    <?php if (!empty($settings['company_logo']) && file_exists($settings['company_logo'])): ?>
-                    <img src="<?= $settings['company_logo'] ?>" class="logo-img" alt="Logo">
+                    <?php if ($logoExists): ?>
+                        <img src="<?= $logoPath ?>" class="logo-img" alt="Company Logo">
                     <?php else: ?>
-                    <div class="logo-text"><?= htmlspecialchars($settings['company_name'] ?? 'DOT INK (PVT) LTD') ?></div>
+                        <div class="logo-text"><?= htmlspecialchars($settings['company_name'] ?? 'DOT INK (PVT) LTD') ?></div>
                     <?php endif; ?>
                 </td>
                 <td class="header-right">
                     <div class="company-name"><?= htmlspecialchars($settings['company_name'] ?? 'DOT INK (PVT) LTD') ?></div>
                     <div class="company-details">
-                        <?= htmlspecialchars($settings['company_address'] ?? '') ?><br>
-                        Hotline: <?= htmlspecialchars($settings['company_hotline'] ?? '') ?> | General: <?= htmlspecialchars($settings['company_general'] ?? '') ?><br>
-                        Email: <?= htmlspecialchars($settings['company_email'] ?? '') ?> | <?= htmlspecialchars($settings['company_website'] ?? '') ?> | VAT: <?= htmlspecialchars($settings['company_vat'] ?? '') ?>
+                        <?= htmlspecialchars($settings['company_address'] ?? '218/13A, Ranimadama, Enderamulla, Wattala.') ?><br>
+                        Hotline: <?= htmlspecialchars($settings['company_hotline'] ?? '075 966 166 8') ?> | General: <?= htmlspecialchars($settings['company_general'] ?? '011 368 780') ?><br>
+                        Email: <?= htmlspecialchars($settings['company_email'] ?? 'info@dotink.lk') ?> | <?= htmlspecialchars($settings['company_website'] ?? 'www.dotink.lk') ?><br>
+                        VAT Reg: <?= htmlspecialchars($settings['company_vat'] ?? '178769677-7000') ?>
                     </div>
                 </td>
             </tr>
         </table>
     </div>
 
-    <!-- CONTENT AREA -->
+    <!-- CONTENT -->
     <div class="content">
-        <!-- TITLE -->
+        <!-- Title -->
         <div class="title">
             <h1>QUOTATION</h1>
             <?php if ($totalPages > 1): ?>
@@ -631,48 +576,45 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
         </div>
 
         <?php if ($isFirstPage): ?>
-        <!-- CUSTOMER INFO (only on first page) -->
+        <!-- Customer Info -->
         <table class="info-table">
             <tr>
                 <td class="lbl">Attention</td>
                 <td class="col">:</td>
-                <td class="val"><strong><?= htmlspecialchars($quotation['customer_contact'] ?: $quotation['customer_name']) ?></strong></td>
+                <td><strong><?= htmlspecialchars($quotation['customer_contact'] ?: $quotation['customer_name']) ?></strong></td>
                 <td class="lbl">Quotation No</td>
                 <td class="col">:</td>
-                <td class="val"><strong style="color:var(--blue)"><?= htmlspecialchars($quotation['quotation_no']) ?></strong></td>
+                <td><strong style="color:var(--blue)"><?= htmlspecialchars($quotation['quotation_no']) ?></strong></td>
             </tr>
             <tr>
                 <td class="lbl">Company</td>
                 <td class="col">:</td>
-                <td class="val"><strong><?= htmlspecialchars($quotation['customer_name']) ?></strong></td>
+                <td><strong><?= htmlspecialchars($quotation['customer_name']) ?></strong></td>
                 <td class="lbl">Date</td>
                 <td class="col">:</td>
-                <td class="val"><?= date('F d, Y', strtotime($quotation['quotation_date'])) ?></td>
+                <td><?= date('F d, Y', strtotime($quotation['quotation_date'])) ?></td>
             </tr>
             <tr>
-                <td class="lbl">Customer ID</td>
-                <td class="col">:</td>
-                <td class="val"><?= htmlspecialchars($quotation['customer_code'] ?? 'N/A') ?></td>
                 <td class="lbl">Phone</td>
                 <td class="col">:</td>
-                <td class="val"><?= htmlspecialchars($quotation['customer_phone'] ?: '-') ?></td>
+                <td><?= htmlspecialchars($quotation['customer_phone'] ?: '-') ?></td>
+                <td class="lbl">Email</td>
+                <td class="col">:</td>
+                <td><?= htmlspecialchars($quotation['customer_email'] ?: '-') ?></td>
             </tr>
             <tr>
                 <td class="lbl">Address</td>
                 <td class="col">:</td>
-                <td class="val"><?= htmlspecialchars($quotation['customer_address'] ?: '-') ?></td>
-                <td class="lbl">Email</td>
-                <td class="col">:</td>
-                <td class="val"><?= htmlspecialchars($quotation['customer_email'] ?: '-') ?></td>
+                <td colspan="4"><?= htmlspecialchars($quotation['customer_address'] ?: '-') ?></td>
             </tr>
         </table>
 
-        <!-- TERMS (only on first page) -->
+        <!-- Terms -->
         <table class="terms-table">
             <tr>
                 <th>Delivery</th>
                 <th>Validity</th>
-                <th>Payments</th>
+                <th>Payment</th>
                 <th>Stock</th>
             </tr>
             <tr>
@@ -683,28 +625,25 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
             </tr>
         </table>
         <?php else: ?>
-        <!-- Continued note for subsequent pages -->
-        <div class="continued-note">
-            ... continued from previous page
-        </div>
+        <div class="continued-note">... continued from previous page</div>
         <?php endif; ?>
 
-        <!-- ITEMS TABLE -->
+        <!-- Items Table -->
         <table class="items-table">
             <thead>
                 <tr>
                     <th style="width:5%">#</th>
-                    <th style="width:10%">Product ID</th>
+                    <th style="width:12%">Code</th>
                     <?php if ($quotation['vat_enabled']): ?>
-                    <th style="width:30%">Product / Specification</th>
+                    <th style="width:28%">Product / Specification</th>
                     <?php else: ?>
-                    <th style="width:37%">Product / Specification</th>
+                    <th style="width:35%">Product / Specification</th>
                     <?php endif; ?>
-                    <th style="width:9%">Warranty</th>
+                    <th style="width:10%">Warranty</th>
                     <th style="width:6%">Qty</th>
                     <th style="width:12%">Unit Price</th>
                     <?php if ($quotation['vat_enabled']): ?>
-                    <th style="width:8%">VAT</th>
+                    <th style="width:10%">VAT</th>
                     <?php endif; ?>
                     <th style="width:13%">Total</th>
                 </tr>
@@ -720,7 +659,7 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
                         <div class="prd-desc"><?= htmlspecialchars($item['product_description']) ?></div>
                         <?php endif; ?>
                     </td>
-                    <td class="txt-c"><?= formatWarranty($item['warranty_value'], $item['warranty_type']) ?></td>
+                    <td class="txt-c"><?= formatWarrantyPrint($item['warranty_value'], $item['warranty_type']) ?></td>
                     <td class="txt-c"><?= $item['quantity'] ?></td>
                     <td class="txt-r">Rs. <?= number_format($item['unit_price'], 2) ?></td>
                     <?php if ($quotation['vat_enabled']): ?>
@@ -733,7 +672,7 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
         </table>
 
         <?php if ($isLastPage): ?>
-        <!-- TOTALS (only on last page) -->
+        <!-- Totals -->
         <div class="totals-wrapper">
             <table class="totals-table">
                 <tr>
@@ -752,7 +691,7 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
                             <?php if ($quotation['discount'] > 0): ?>
                             <tr class="discount-row">
                                 <td><strong>Discount</strong></td>
-                                <td class="txt-r"><strong>-Rs. <?= number_format($quotation['discount'], 2) ?></strong></td>
+                                <td class="txt-r"><strong>- Rs. <?= number_format($quotation['discount'], 2) ?></strong></td>
                             </tr>
                             <?php endif; ?>
                             <?php if ($quotation['vat_enabled']): ?>
@@ -771,7 +710,7 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
             </table>
         </div>
 
-        <!-- NOTES (only on last page) -->
+        <!-- Notes -->
         <?php if ($quotation['notes']): ?>
         <div class="notes-box">
             <div class="notes-title">Special Notes</div>
@@ -785,29 +724,24 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
 
     <!-- FOOTER -->
     <div class="footer">
-        <div class="footer-contact">
-            <table class="footer-contact-table">
-                <tr>
-                    <td class="footer-contact-left">
-                        <strong>For Sales and Technical Inquiries:</strong><br>
-                        <span class="footer-contact-name"><?= htmlspecialchars($settings['prepared_by_name'] ?? 'M.ASHAN') ?></span><br>
-                        <?= htmlspecialchars($settings['prepared_by_title'] ?? 'Executive - Operation Management') ?> | Mobile: <?= htmlspecialchars($settings['prepared_by_mobile'] ?? '075 966 166 8') ?>
-                    </td>
-                    <td class="footer-contact-right">
-                        <strong style="color:var(--blue);"><?= htmlspecialchars($quotation['quotation_no']) ?></strong>
-                        <?php if ($totalPages > 1): ?>
-                        <br><small>Page <?= $pageIndex + 1 ?>/<?= $totalPages ?></small>
-                        <?php endif; ?>
-                    </td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="footer-bottom">
-            <div class="footer-line"></div>
-            <div class="footer-copyright">
-                © <?= htmlspecialchars($settings['company_name'] ?? 'DOT INK (PVT) LTD') ?> • This Document is Copyright to <?= htmlspecialchars($settings['company_name'] ?? 'DOT INK (PVT) LTD') ?>
-            </div>
+        <table class="footer-contact-table">
+            <tr>
+                <td class="footer-contact-left">
+                    <strong>For Sales and Technical Inquiries:</strong><br>
+                    <span class="footer-contact-name"><?= htmlspecialchars($settings['prepared_by_name'] ?? 'M.ASHAN') ?></span><br>
+                    <?= htmlspecialchars($settings['prepared_by_title'] ?? 'Executive - Operation Management') ?> | Mobile: <?= htmlspecialchars($settings['prepared_by_mobile'] ?? '075 966 166 8') ?>
+                </td>
+                <td class="footer-contact-right">
+                    <strong style="color:var(--blue);"><?= htmlspecialchars($quotation['quotation_no']) ?></strong>
+                    <?php if ($totalPages > 1): ?>
+                    <br><small>Page <?= $pageIndex + 1 ?>/<?= $totalPages ?></small>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        </table>
+        <div class="footer-line"></div>
+        <div class="footer-copyright">
+            © <?= date('Y') ?> <?= htmlspecialchars($settings['company_name'] ?? 'DOT INK (PVT) LTD') ?> • This Document is Copyright Protected
         </div>
     </div>
 </div>
