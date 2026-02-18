@@ -2,21 +2,17 @@
 /**
  * Print Quotation - A4 Format
  */
-
 require_once __DIR__ . '/../../classes/Quotation.php';
-
 $quotationModel = new Quotation();
 $settings = $quotationModel->getCompanySettings();
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-
 if (!$id) {
     header('Location: index.php');
     exit;
 }
 
 $quotation = $quotationModel->getById($id);
-
 if (!$quotation) {
     header('Location: index.php');
     exit;
@@ -44,9 +40,9 @@ $logoExists = file_exists($logoFullPath);
 // Amount in words
 $amountInWords = 'Rupees ' . $quotationModel->numberToWords((int)$quotation['grand_total']) . ' Only';
 
-// Pagination
-$itemsPerFirstPage = 6;
-$itemsPerNextPage = 12;
+// Pagination - reduced items per page since fonts are bigger now
+$itemsPerFirstPage = 5;
+$itemsPerNextPage = 9;
 $items = $quotation['items'];
 $totalItems = count($items);
 
@@ -91,8 +87,8 @@ function formatWarrantyPrint($value, $type) {
 
         html, body {
             font-family: Cambria, Georgia, serif;
-            font-size: 10pt;
-            line-height: 1.4;
+            font-size: 12pt;
+            line-height: 1.5;
             color: var(--dark);
             background: #fff;
             -webkit-print-color-adjust: exact !important;
@@ -151,7 +147,7 @@ function formatWarrantyPrint($value, $type) {
         .page {
             width: 210mm;
             height: 297mm;
-            padding: 10mm 15mm;
+            padding: 0 15mm;
             margin: 0 auto;
             background: #fff;
             position: relative;
@@ -165,11 +161,11 @@ function formatWarrantyPrint($value, $type) {
             page-break-after: auto;
         }
 
-        /* Header */
+        /* Header - Fixed to top */
         .header {
-            border-bottom: 2.5px solid var(--cyan);
-            padding-bottom: 3mm;
-            margin-bottom: 3mm;
+            border-bottom: 3px solid var(--cyan);
+            padding: 8mm 0 4mm 0;
+            flex-shrink: 0;
         }
 
         .header-table {
@@ -189,28 +185,28 @@ function formatWarrantyPrint($value, $type) {
         }
 
         .logo-img {
-            max-width: 180px;
-            max-height: 60px;
+            max-width: 300px;
+            max-height: 90px;
             height: auto;
         }
 
         .logo-text {
-            font-size: 20pt;
+            font-size: 26pt;
             font-weight: bold;
             color: var(--blue);
         }
 
         .company-name {
-            font-size: 14pt;
+            font-size: 18pt;
             font-weight: bold;
             color: var(--blue);
-            margin-bottom: 1mm;
+            margin-bottom: 2mm;
         }
 
         .company-details {
-            font-size: 8pt;
+            font-size: 10pt;
             color: #555;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         /* Content */
@@ -218,24 +214,25 @@ function formatWarrantyPrint($value, $type) {
             flex: 1;
             display: flex;
             flex-direction: column;
+            padding: 4mm 0;
         }
 
         /* Title */
         .title {
             text-align: center;
-            margin-bottom: 3mm;
+            margin-bottom: 4mm;
         }
 
         .title h1 {
-            font-size: 16pt;
+            font-size: 20pt;
             font-weight: bold;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             margin: 0;
             color: var(--dark);
         }
 
         .page-indicator {
-            font-size: 9pt;
+            font-size: 11pt;
             color: #666;
             margin-top: 1mm;
         }
@@ -244,13 +241,13 @@ function formatWarrantyPrint($value, $type) {
         .info-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 3mm;
+            margin-bottom: 4mm;
             font-size: 9pt;
             border: 1px solid #ccc;
         }
 
         .info-table td {
-            padding: 1.5mm 2mm;
+            padding: 2mm 3mm;
             border-bottom: 1px solid #eee;
             vertical-align: top;
         }
@@ -262,7 +259,7 @@ function formatWarrantyPrint($value, $type) {
         .info-table .lbl {
             font-weight: 600;
             color: #555;
-            width: 70px;
+            width: 85px;
             white-space: nowrap;
         }
 
@@ -274,14 +271,14 @@ function formatWarrantyPrint($value, $type) {
         .terms-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 3mm;
-            font-size: 8pt;
+            margin-bottom: 4mm;
+            font-size: 9pt;
         }
 
         .terms-table th,
         .terms-table td {
             border: 1px solid #999;
-            padding: 1.5mm;
+            padding: 2mm;
             text-align: center;
         }
 
@@ -295,24 +292,24 @@ function formatWarrantyPrint($value, $type) {
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 3mm;
-            font-size: 8pt;
+            margin-bottom: 4mm;
+            font-size: 9pt;
             border: 1px solid #000;
         }
 
         .items-table th {
             background: var(--cyan);
             color: #fff;
-            padding: 2mm 1.5mm;
+            padding: 2.5mm 2mm;
             text-align: center;
             font-weight: 600;
-            font-size: 8pt;
+            font-size: 10pt;
             text-transform: uppercase;
             border: 1px solid #000;
         }
 
         .items-table td {
-            padding: 1.5mm;
+            padding: 2mm;
             border: 1px solid #000;
             vertical-align: top;
         }
@@ -322,32 +319,32 @@ function formatWarrantyPrint($value, $type) {
 
         .prd-name {
             font-weight: 600;
-            font-size: 8pt;
+            font-size: 10pt;
         }
 
         .prd-desc {
-            font-size: 7pt;
+            font-size: 9pt;
             color: #555;
             margin-top: 0.5mm;
-            line-height: 1.2;
+            line-height: 1.3;
             white-space: pre-line;
         }
 
         .continued-note {
             text-align: center;
-            font-size: 8pt;
+            font-size: 10pt;
             color: #666;
             font-style: italic;
-            padding: 2mm;
+            padding: 3mm;
             background: #f9f9f9;
             border: 1px dashed #ccc;
-            margin-bottom: 3mm;
+            margin-bottom: 4mm;
         }
 
         /* Totals */
         .totals-wrapper {
             width: 100%;
-            margin-bottom: 3mm;
+            margin-bottom: 4mm;
         }
 
         .totals-table {
@@ -369,20 +366,20 @@ function formatWarrantyPrint($value, $type) {
         .words-box {
             background: #f9f9f9;
             border: 1px solid #ddd;
-            padding: 2mm;
-            font-size: 8pt;
+            padding: 3mm;
+            font-size: 10pt;
             font-style: italic;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .amounts-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 9pt;
+            font-size: 11pt;
         }
 
         .amounts-table td {
-            padding: 1mm 2mm;
+            padding: 1.5mm 2mm;
         }
 
         .amounts-table .txt-r {
@@ -390,11 +387,11 @@ function formatWarrantyPrint($value, $type) {
         }
 
         .amounts-table .total-row td {
-            border-top: 1.5px solid #000;
-            border-bottom: 1.5px solid #000;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
             font-weight: bold;
-            font-size: 10pt;
-            padding: 1.5mm 2mm;
+            font-size: 12pt;
+            padding: 2mm;
         }
 
         .amounts-table .discount-row td {
@@ -408,29 +405,32 @@ function formatWarrantyPrint($value, $type) {
         /* Notes */
         .notes-box {
             border: 1px solid var(--cyan);
-            margin-bottom: 3mm;
+            margin-bottom: 4mm;
         }
 
         .notes-title {
             background: var(--cyan);
             color: #fff;
-            padding: 1.5mm;
+            padding: 2mm;
             text-align: center;
             font-weight: bold;
-            font-size: 8pt;
+            font-size: 10pt;
             text-transform: uppercase;
         }
 
         .notes-content {
-            padding: 2mm;
-            font-size: 8pt;
-            line-height: 1.3;
+            padding: 3mm;
+            font-size: 10pt;
+            line-height: 1.4;
         }
 
-        /* Footer */
+        /* Footer - Fixed to bottom */
         .footer {
             margin-top: auto;
-            padding-top: 2mm;
+            padding: 0 0 6mm 0;
+            flex-shrink: 0;
+            border-top: 2px solid var(--cyan);
+            padding-top: 3mm;
         }
 
         .footer-contact-table {
@@ -441,8 +441,8 @@ function formatWarrantyPrint($value, $type) {
         .footer-contact-left {
             width: 70%;
             vertical-align: top;
-            font-size: 8pt;
-            line-height: 1.3;
+            font-size: 10pt;
+            line-height: 1.4;
         }
 
         .footer-contact-right {
@@ -454,19 +454,19 @@ function formatWarrantyPrint($value, $type) {
         .footer-contact-name {
             color: var(--blue);
             font-weight: bold;
-            font-size: 9pt;
+            font-size: 11pt;
         }
 
         .footer-line {
             border-top: 1.5px solid var(--cyan);
-            margin: 2mm 0 0 0;
+            margin: 3mm 0 0 0;
         }
 
         .footer-copyright {
             text-align: center;
-            font-size: 7pt;
+            font-size: 8pt;
             color: #777;
-            padding-top: 1.5mm;
+            padding-top: 2mm;
         }
 
         /* Print Styles */
@@ -529,7 +529,7 @@ function formatWarrantyPrint($value, $type) {
         ← Back
     </a>
     <button class="action-btn btn-print" onclick="window.print()">
-        🖨️ Print
+        🖨 Print
     </button>
 </div>
 
@@ -541,7 +541,7 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
 ?>
 
 <div class="page">
-    <!-- HEADER -->
+    <!-- HEADER - appears on every page -->
     <div class="header">
         <table class="header-table">
             <tr>
@@ -641,11 +641,11 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
                     <?php endif; ?>
                     <th style="width:10%">Warranty</th>
                     <th style="width:6%">Qty</th>
-                    <th style="width:12%">Unit Price</th>
+                    <th style="width:16%">Unit Price</th>
                     <?php if ($quotation['vat_enabled']): ?>
-                    <th style="width:10%">VAT</th>
+                    <th style="width: 13%">VAT</th>
                     <?php endif; ?>
-                    <th style="width:13%">Total</th>
+                    <th style="width:16%">Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -722,7 +722,7 @@ $startItemNum = ($pageIndex === 0) ? 1 : $itemsPerFirstPage + ($pageIndex - 1) *
         <?php endif; ?>
     </div>
 
-    <!-- FOOTER -->
+    <!-- FOOTER - appears on every page, stuck to bottom -->
     <div class="footer">
         <table class="footer-contact-table">
             <tr>

@@ -24,6 +24,25 @@ if (!$quotation) {
 
 $pageTitle = 'View ' . $quotation['quotation_no'] . ' - ' . APP_NAME;
 
+// Format warranty
+function formatWarrantyView($value, $type) {
+    if ($type === 'Lifetime') return 'Lifetime';
+    if ($value && $type) return $value . ' ' . $type;
+    return '-';
+}
+
+// Status badge class
+function getStatusClass($status) {
+    $classes = [
+        'Draft' => 'bg-secondary',
+        'Final' => 'bg-success',
+        'Approved' => 'bg-primary',
+        'Rejected' => 'bg-danger',
+        'Expired' => 'bg-warning text-dark'
+    ];
+    return $classes[$status] ?? 'bg-secondary';
+}
+
 include __DIR__ . '/../../includes/header.php';
 ?>
 
@@ -33,29 +52,27 @@ include __DIR__ . '/../../includes/header.php';
         <div class="col-md-6">
             <h2>
                 <i class="bi bi-file-text me-2"></i><?= htmlspecialchars($quotation['quotation_no']) ?>
-                <?php
-                $statusClass = [
-                    'Draft' => 'bg-secondary',
-                    'Final' => 'bg-success',
-                    'Approved' => 'bg-primary',
-                    'Rejected' => 'bg-danger',
-                    'Expired' => 'bg-warning text-dark'
-                ];
-                $class = $statusClass[$quotation['status']] ?? 'bg-secondary';
-                ?>
-                <span class="badge <?= $class ?> fs-6"><?= $quotation['status'] ?></span>
+                <span class="badge <?= getStatusClass($quotation['status']) ?> fs-6 ms-2"><?= $quotation['status'] ?></span>
             </h2>
-            <p class="text-muted">Created: <?= date(DISPLAY_DATE_FORMAT, strtotime($quotation['created_at'])) ?></p>
+            <p class="text-muted mb-0">
+                Created: <?= date('F d, Y \a\t h:i A', strtotime($quotation['created_at'])) ?>
+                <?php if ($quotation['updated_at'] && $quotation['updated_at'] != $quotation['created_at']): ?>
+                | Updated: <?= date('F d, Y \a\t h:i A', strtotime($quotation['updated_at'])) ?>
+                <?php endif; ?>
+            </p>
         </div>
         <div class="col-md-6 text-end">
-            <a href="edit.php?id=<?= $id ?>" class="btn btn-primary me-2">
-                <i class="bi bi-pencil me-2"></i>Edit
+            <a href="edit.php?id=<?= $id ?>" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i>Edit
             </a>
-            <a href="print.php?id=<?= $id ?>" class="btn btn-success me-2" target="_blank">
-                <i class="bi bi-printer me-2"></i>Print
+            <a href="print.php?id=<?= $id ?>" class="btn btn-success" target="_blank">
+                <i class="bi bi-printer me-1"></i>Print
             </a>
+            <button type="button" class="btn btn-outline-danger" onclick="deleteQuotation(<?= $id ?>, '<?= $quotation['quotation_no'] ?>')">
+                <i class="bi bi-trash me-1"></i>Delete
+            </button>
             <a href="index.php" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-2"></i>Back
+                <i class="bi bi-arrow-left me-1"></i>Back
             </a>
         </div>
     </div>
@@ -63,7 +80,7 @@ include __DIR__ . '/../../includes/header.php';
     <div class="row">
         <!-- Main Content -->
         <div class="col-lg-8">
-            <!-- Customer Info -->
+            <!-- Customer Info Card -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-person me-2"></i>Customer Information</h5>
@@ -71,91 +88,110 @@ include __DIR__ . '/../../includes/header.php';
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Company:</strong> <?= htmlspecialchars($quotation['customer_name']) ?></p>
-                            <p><strong>Contact:</strong> <?= htmlspecialchars($quotation['customer_contact'] ?: '-') ?></p>
-                            <p><strong>Phone:</strong> <?= htmlspecialchars($quotation['customer_phone'] ?: '-') ?></p>
+                            <table class="table table-sm table-borderless mb-0">
+                                <tr>
+                                    <td class="text-muted" style="width:120px;">Company:</td>
+                                    <td><strong class="text-primary fs-5"><?= htmlspecialchars($quotation['customer_name']) ?></strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Contact Person:</td>
+                                    <td><?= htmlspecialchars($quotation['customer_contact'] ?: '-') ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Phone:</td>
+                                    <td><?= htmlspecialchars($quotation['customer_phone'] ?: '-') ?></td>
+                                </tr>
+                            </table>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Email:</strong> <?= htmlspecialchars($quotation['customer_email'] ?: '-') ?></p>
-                            <p><strong>Address:</strong> <?= nl2br(htmlspecialchars($quotation['customer_address'] ?: '-')) ?></p>
+                            <table class="table table-sm table-borderless mb-0">
+                                <tr>
+                                    <td class="text-muted" style="width:80px;">Email:</td>
+                                    <td><?= htmlspecialchars($quotation['customer_email'] ?: '-') ?></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-muted">Address:</td>
+                                    <td><?= htmlspecialchars($quotation['customer_address'] ?: '-') ?></td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Items -->
+            <!-- Items Card -->
             <div class="card mb-4">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="bi bi-cart me-2"></i>Quotation Items</h5>
+                    <h5 class="mb-0"><i class="bi bi-cart me-2"></i>Quotation Items (<?= count($quotation['items']) ?>)</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-bordered mb-0">
+                        <table class="table table-bordered table-hover mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th style="width:5%">#</th>
-                                    <th style="width:10%">Product ID</th>
-                                    <th style="width:30%">Product / Description</th>
+                                    <th style="width:12%">Code</th>
+                                    <th style="width:28%">Product</th>
                                     <th style="width:12%">Warranty</th>
                                     <th style="width:8%" class="text-center">Qty</th>
-                                    <th style="width:12%" class="text-end">Unit Price</th>
+                                    <th style="width:13%" class="text-end">Unit Price</th>
                                     <?php if ($quotation['vat_enabled']): ?>
                                     <th style="width:10%" class="text-end">VAT</th>
                                     <?php endif; ?>
-                                    <th style="width:13%" class="text-end">Total</th>
+                                    <th style="width:14%" class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                <?php if (empty($quotation['items'])): ?>
+                                <tr>
+                                    <td colspan="<?= $quotation['vat_enabled'] ? 8 : 7 ?>" class="text-center py-4 text-muted">
+                                        No items in this quotation
+                                    </td>
+                                </tr>
+                                <?php else: ?>
                                 <?php foreach ($quotation['items'] as $index => $item): ?>
                                 <tr>
                                     <td class="text-center"><?= $index + 1 ?></td>
-                                    <td><strong><?= htmlspecialchars($item['product_code'] ?: 'N/A') ?></strong></td>
+                                    <td>
+                                        <strong class="text-success"><?= htmlspecialchars($item['product_code'] ?: 'N/A') ?></strong>
+                                    </td>
                                     <td>
                                         <strong><?= htmlspecialchars($item['product_name']) ?></strong>
-                                        <?php if ($item['product_description']): ?>
+                                        <?php if (!empty($item['product_description'])): ?>
                                         <br><small class="text-muted"><?= nl2br(htmlspecialchars($item['product_description'])) ?></small>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="text-center">
-                                        <?php
-                                        if ($item['warranty_type'] === 'Lifetime') {
-                                            echo 'Lifetime';
-                                        } elseif ($item['warranty_value'] && $item['warranty_type']) {
-                                            echo $item['warranty_value'] . ' ' . $item['warranty_type'];
-                                        } else {
-                                            echo '-';
-                                        }
-                                        ?>
-                                    </td>
-                                    <td class="text-center"><?= $item['quantity'] ?></td>
+                                    <td class="text-center"><?= formatWarrantyView($item['warranty_value'], $item['warranty_type']) ?></td>
+                                    <td class="text-center"><strong><?= $item['quantity'] ?></strong></td>
                                     <td class="text-end">Rs. <?= number_format($item['unit_price'], 2) ?></td>
                                     <?php if ($quotation['vat_enabled']): ?>
-                                    <td class="text-end">Rs. <?= number_format($item['vat_amount'], 2) ?></td>
+                                    <td class="text-end text-info">Rs. <?= number_format($item['vat_amount'], 2) ?></td>
                                     <?php endif; ?>
-                                    <td class="text-end"><strong>Rs. <?= number_format($item['line_total'], 2) ?></strong></td>
+                                    <td class="text-end"><strong class="text-success">Rs. <?= number_format($item['line_total'], 2) ?></strong></td>
                                 </tr>
                                 <?php endforeach; ?>
+                                <?php endif; ?>
                             </tbody>
                             <tfoot class="table-light">
                                 <tr>
-                                    <td colspan="<?= $quotation['vat_enabled'] ? 7 : 6 ?>" class="text-end fw-bold">Subtotal:</td>
-                                    <td class="text-end fw-bold">Rs. <?= number_format($quotation['subtotal'], 2) ?></td>
+                                    <td colspan="<?= $quotation['vat_enabled'] ? 6 : 5 ?>" class="text-end fw-bold">Subtotal:</td>
+                                    <td colspan="2" class="text-end fw-bold">Rs. <?= number_format($quotation['subtotal'], 2) ?></td>
                                 </tr>
                                 <?php if ($quotation['discount'] > 0): ?>
                                 <tr class="text-danger">
-                                    <td colspan="<?= $quotation['vat_enabled'] ? 7 : 6 ?>" class="text-end fw-bold">Discount:</td>
-                                    <td class="text-end fw-bold">-Rs. <?= number_format($quotation['discount'], 2) ?></td>
+                                    <td colspan="<?= $quotation['vat_enabled'] ? 6 : 5 ?>" class="text-end fw-bold">Discount:</td>
+                                    <td colspan="2" class="text-end fw-bold">- Rs. <?= number_format($quotation['discount'], 2) ?></td>
                                 </tr>
                                 <?php endif; ?>
                                 <?php if ($quotation['vat_enabled']): ?>
                                 <tr class="text-info">
-                                    <td colspan="7" class="text-end fw-bold">VAT (<?= $quotation['vat_percentage'] ?>%):</td>
-                                    <td class="text-end fw-bold">Rs. <?= number_format($quotation['tax_amount'], 2) ?></td>
+                                    <td colspan="6" class="text-end fw-bold">VAT (<?= $quotation['vat_percentage'] ?>%):</td>
+                                    <td colspan="2" class="text-end fw-bold">Rs. <?= number_format($quotation['tax_amount'], 2) ?></td>
                                 </tr>
                                 <?php endif; ?>
                                 <tr class="table-dark">
-                                    <td colspan="<?= $quotation['vat_enabled'] ? 7 : 6 ?>" class="text-end fw-bold fs-5">GRAND TOTAL:</td>
-                                    <td class="text-end fw-bold fs-5">Rs. <?= number_format($quotation['grand_total'], 2) ?></td>
+                                    <td colspan="<?= $quotation['vat_enabled'] ? 6 : 5 ?>" class="text-end fw-bold fs-5">GRAND TOTAL:</td>
+                                    <td colspan="2" class="text-end fw-bold fs-5">Rs. <?= number_format($quotation['grand_total'], 2) ?></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -163,14 +199,14 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
             </div>
             
-            <!-- Notes -->
-            <?php if ($quotation['notes']): ?>
+            <!-- Notes Card -->
+            <?php if (!empty($quotation['notes'])): ?>
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Notes</h5>
+                    <h5 class="mb-0"><i class="bi bi-sticky me-2"></i>Notes & Remarks</h5>
                 </div>
                 <div class="card-body">
-                    <?= nl2br(htmlspecialchars($quotation['notes'])) ?>
+                    <p class="mb-0" style="white-space: pre-line;"><?= htmlspecialchars($quotation['notes']) ?></p>
                 </div>
             </div>
             <?php endif; ?>
@@ -178,10 +214,10 @@ include __DIR__ . '/../../includes/header.php';
         
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Details -->
+            <!-- Quotation Details -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Details</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Quotation Details</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless mb-0">
@@ -191,15 +227,25 @@ include __DIR__ . '/../../includes/header.php';
                         </tr>
                         <tr>
                             <td class="text-muted">Date:</td>
-                            <td><?= date(DISPLAY_DATE_FORMAT, strtotime($quotation['quotation_date'])) ?></td>
+                            <td><strong><?= date('F d, Y', strtotime($quotation['quotation_date'])) ?></strong></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Status:</td>
-                            <td><span class="badge <?= $class ?>"><?= $quotation['status'] ?></span></td>
+                            <td><span class="badge <?= getStatusClass($quotation['status']) ?>"><?= $quotation['status'] ?></span></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Prepared By:</td>
                             <td><?= htmlspecialchars($quotation['prepared_by'] ?: '-') ?></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">VAT:</td>
+                            <td>
+                                <?php if ($quotation['vat_enabled']): ?>
+                                <span class="badge bg-info"><?= $quotation['vat_percentage'] ?>% Enabled</span>
+                                <?php else: ?>
+                                <span class="badge bg-secondary">Not Applied</span>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     </table>
                 </div>
@@ -208,7 +254,7 @@ include __DIR__ . '/../../includes/header.php';
             <!-- Terms -->
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2"></i>Terms</h5>
+                    <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Terms & Conditions</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless mb-0">
@@ -222,7 +268,7 @@ include __DIR__ . '/../../includes/header.php';
                         </tr>
                         <tr>
                             <td class="text-muted">Validity:</td>
-                            <td><?= htmlspecialchars($quotation['validity'] ?: '-') ?></td>
+                            <td><strong><?= htmlspecialchars($quotation['validity'] ?: '-') ?></strong></td>
                         </tr>
                         <tr>
                             <td class="text-muted">Stock:</td>
@@ -232,10 +278,10 @@ include __DIR__ . '/../../includes/header.php';
                 </div>
             </div>
             
-            <!-- Summary -->
+            <!-- Summary Card -->
             <div class="card mb-4 border-primary">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Summary</h5>
+                    <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Amount Summary</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
@@ -245,7 +291,7 @@ include __DIR__ . '/../../includes/header.php';
                     <?php if ($quotation['discount'] > 0): ?>
                     <div class="d-flex justify-content-between mb-2 text-danger">
                         <span>Discount:</span>
-                        <strong>-Rs. <?= number_format($quotation['discount'], 2) ?></strong>
+                        <strong>- Rs. <?= number_format($quotation['discount'], 2) ?></strong>
                     </div>
                     <?php endif; ?>
                     <?php if ($quotation['vat_enabled']): ?>
@@ -270,9 +316,9 @@ include __DIR__ . '/../../includes/header.php';
                 <a href="print.php?id=<?= $id ?>" class="btn btn-success btn-lg" target="_blank">
                     <i class="bi bi-printer me-2"></i>Print / Download
                 </a>
-                <button type="button" class="btn btn-outline-danger" onclick="deleteQuotation(<?= $id ?>, '<?= $quotation['quotation_no'] ?>')">
-                    <i class="bi bi-trash me-2"></i>Delete Quotation
-                </button>
+                <a href="create.php" class="btn btn-outline-primary">
+                    <i class="bi bi-plus-circle me-2"></i>Create New Quotation
+                </a>
             </div>
         </div>
     </div>
@@ -280,7 +326,7 @@ include __DIR__ . '/../../includes/header.php';
 
 <script>
 function deleteQuotation(id, quotationNo) {
-    if (confirm('Are you sure you want to delete quotation ' + quotationNo + '?\nThis action cannot be undone.')) {
+    if (confirm('Are you sure you want to delete quotation ' + quotationNo + '?\n\nThis action cannot be undone!')) {
         fetch('<?= APP_URL ?>ajax/delete_quotation.php', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
